@@ -132,6 +132,7 @@
         c.classList.add('container');
         c.innerHTML = tpl.replace('##REPLACE_ME##', id);
 
+        i.dataset = i.dataset || {}; // fix for ie10
         i.dataset.id = id;
         i.src = 'inner.html';
         i.style.width = '100%';
