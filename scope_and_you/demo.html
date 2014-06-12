@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>demo</title>
+  <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <style type="text/css">
+    #buttons {
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="buttons">
+    <div class="row">
+      <div class="col-md-12">
+          <button class="btn btn-success" id="run">Run them all!!</button>
+          <button class="btn btn-primary" id="new-editor">Add an editor</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12" id="examples">
+        <h3>Examples:</h3>
+      </div>
+    </div>
+
+  </div>
+  <div id="frames">
+
+  </div>
+
+  <script id="frametpl" type="text/html-tpl">
+    <div id="##REPLACE_ME##">
+      <div class="row alerts">
+        <div class="col-lg-12">
+          <div class="alert alert-success">
+           All good for now.
+          </div>
+          <div style="display:none;" class="alert alert-danger">
+            <h4>Errors:</h4>
+          </div>
+          <div style="display:none;" class="alert alert-warning">
+
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="innermost col-lg-12"></div>
+      </div>
+    </div>
+  </script>
+
+
+  <script>
+    (function (w, doc) {
+      var tpl;
+      var routes = {
+        scanned: onScanned,
+        error: onError
+      };
+
+      doc.addEventListener('DOMContentLoaded', function (e) {
+        var frameBox;
+        var examples;
+        var i, n;
+
+        tpl = document.getElementById('frametpl').text;
+
+        frameBox = document.getElementById('frames');
+
+        addEditor(frameBox);
+
+        examples = doc.querySelectorAll('.js-example');
+        for (i = 0, n = examples.length; i < n; i += 1) {
+          (function (example, num) {
+            var btn = document.createElement('button');
+            btn.classList.add('btn', 'btn-small', 'btn-info');
+            btn.textContent = ( num + 1 );
+            document.getElementById('examples').appendChild(btn);
+          }(examples[i], i));
+        }
+
+        doc.getElementById('run')
+          .addEventListener('click', function (e) {
+            var i, n;
+            var els = document.getElementsByTagName('iframe');
+            e.preventDefault();
+
+            for (i = 0, n = els.length; i < n; i += 1) {
+              clearErrs(els[i].dataset.id);
+              els[i].contentWindow
+                .postMessage(
+                  {'evt': 'run', 'id': els[i].dataset.id},
+                  '*'
+                );
+            }
+          });
+
+        doc.getElementById('new-editor')
+          .addEventListener('click', function (e) {
+            e.preventDefault();
+            addEditor(frameBox);
+          });
+
+        doc.getElementById('examples')
+          .addEventListener('click', function (e) {
+            var script = document.getElementById('example-' + e.target.textContent);
+            w.frames[0].postMessage({evt: 'set', script: script.text}, '*');
+          });
+
+      });
+
+      w.addEventListener('message', function (e) {
+        var evt = e.data.evt;
+        var route = routes[evt] || nop;
+        return route(e);
+      });
+
+      function addEditor(elem) {
+        if (!elem || !(elem instanceof HTMLElement)) {
+          return;
+        }
+
+        return elem.appendChild(getEditor());
+      }
+
+      function getEditor() {
+        var f = doc.createDocumentFragment();
+        var c = doc.createElement('div');
+        var i = doc.createElement('iframe');
+        var id = uuid();
+        c.classList.add('container');
+        c.innerHTML = tpl.replace('##REPLACE_ME##', id);
+
+        i.dataset.id = id;
+        i.src = 'inner.html';
+        i.style.width = '100%';
+        i.style.height = '600px';
+        i.style.marginLeft = 'auto';
+        i.style.marginRight = 'auto';
+
+        c.querySelector('.innermost').appendChild(i);
+        f.appendChild(c);
+        return f;
+      }
+
+
+      function uuid(a){
+        return a           // if the placeholder was passed, return
+          ? (              // a random number from 0 to 15
+            a ^            // unless b is 8,
+            Math.random()  // in which case
+            * 16           // a random number from
+            >> a/4         // 8 to 11
+            ).toString(16) // in hexadecimal
+          : (              // or otherwise a concatenated string:
+            [1e7] +        // 10000000 +
+            -1e3 +         // -1000 +
+            -4e3 +         // -4000 +
+            -8e3 +         // -80000000 +
+            -1e11          // -100000000000,
+            ).replace(     // replacing
+              /[018]/g,    // zeroes, ones, and eights with
+              uuid         // random hex digits
+            );
+      }
+
+      function onScanned(evt) {
+        var numGlobals = evt.data.globals;
+        var suffix = numGlobals > 1 ? 's' : '';
+
+        //console.log(evt.data);
+        if (numGlobals) {
+          addErr(evt.data.id,
+            'globals-count',
+            numGlobals + ' global' + suffix + ' found!'
+          );
+        }
+      }
+
+      function onError(evt) {
+        var text = evt.data.err;
+        addErr(evt.data.id, 'err', text);
+      }
+
+      function addErr(id, type, msg) {
+        var root = document.getElementById(id);
+        var err;
+        var el = root.querySelector('.alerts .alert-danger');
+
+        err = root.querySelector('.' +type);
+        if (err) {
+          err.parentNode.removeChild(err);
+        }
+
+        err = document.createElement('div');
+        err.innerHTML = '<pre></pre>';
+        err.classList.add(type);
+        err.firstChild.textContent = msg;
+        el.appendChild(err);
+
+        el.style.display = 'block';
+
+        root
+          .querySelector('.alerts .alert-success')
+          .style
+          .display = 'none';
+
+      }
+
+      function clearErrs(id) {
+        var el = document.getElementById(id)
+          .querySelector('.alerts .alert-danger');
+        var i;
+
+        for (i = 1; i < el.children.length; i += 1) {
+          el.removeChild(el.children[i]);
+        }
+
+      }
+
+      function nop() {
+        //console.log(arguments);
+      }
+    }(window, document));
+  </script>
+
+
+<script id="example-1" class="js-example" type="text/js-tpl">
+
+var myGlobal = "abc123";
+myOtherGlobal = "1234abc";
+window.yetAnotherGlobal = "That was easy";
+
+</script>
+
+
+
+<script id="example-2" class="js-example" type="text/js-tpl">
+// here we create a global
+var myGlobal = "Hello World!";
+
+function messUpMyGlobal() {
+  // here we change a global
+  myGlobal = "some mess we have here";
+}
+
+function whatsThis(myGlobal) {
+  // but what happens here?
+  console.log(myGlobal);
+}
+
+messUpMyGlobal();
+console.log(myGlobal);
+
+whatsThis('I wouldn\'t do that, Dave');
+
+</script>
+
+<script id="example-3" class="js-example" type="text/js-tpl">
+// hoisting example
+
+(function () {
+  // create a variable in our isolated scope
+  var waay = 1;
+
+  // create a function that uses the same variable without
+  // redeclaring it.
+  function yesWaay() {
+    if (!waay) {
+      waay = 10;
+    }
+
+    console.log(waay);
+  }
+
+  yesWaay();
+
+  function noWaay() {
+    if (!waay) {
+      var waay = 10;
+    }
+
+    console.log(waay);
+  }
+
+  noWaay();
+})();
+
+</script>
+
+
+</body>
+</html>

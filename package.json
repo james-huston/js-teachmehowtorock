@@ -1,0 +1,22 @@
+{
+  "name": "js-teachmehowtorock",
+  "version": "0.1.0",
+  "description": "Some teachings/learnings on javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/james-huston/js-teachmehowtorock.git"
+  },
+  "author": "James Huston <james@jameshuston.net>",
+  "license": "Apache2",
+  "bugs": {
+    "url": "https://github.com/james-huston/js-teachmehowtorock/issues"
+  },
+  "homepage": "https://github.com/james-huston/js-teachmehowtorock",
+  "dependencies": {
+    "serv": "0.0.7"
+  }
+}
