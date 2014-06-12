@@ -227,7 +227,9 @@
 
 
 <script id="example-1" class="js-example" type="text/js-tpl">
-
+/**
+ * How do I create globals?
+ */
 var myGlobal = "abc123";
 myOtherGlobal = "1234abc";
 window.yetAnotherGlobal = "That was easy";
@@ -237,11 +239,15 @@ window.yetAnotherGlobal = "That was easy";
 
 
 <script id="example-2" class="js-example" type="text/js-tpl">
+/**
+ * Why are globals bad?
+ */
+
 // here we create a global
 var myGlobal = "Hello World!";
 
 function messUpMyGlobal() {
-  // here we change a global
+  // Uh Oh, here we change a global
   myGlobal = "some mess we have here";
 }
 
@@ -288,6 +294,96 @@ whatsThis('I wouldn\'t do that, Dave');
 })();
 
 </script>
+
+<script id="example-4" class="js-example" type="text/js-tpl">
+/**
+ * How do I avoid creating globals in my code?
+ */
+
+// Wrap your code in self executing functions
+(function () {
+  var thisIsNotGlobal = 'yaaay!';
+})();
+
+// don't forget the var keyword!
+(function () {
+  thisIsGlobal = 'boooo!';
+})();
+</script>
+
+
+<script id="example-5" class="js-example" type="text/js-tpl">
+/**
+ * OK, but i am creating something on my page that really needs
+ * to be global, how should I do that?
+ */
+
+// use a self executing function and attach it in a clear way
+(function (global, undefined) {
+  global.myImportantGlobal = 'James was here';
+
+  // you can do this and you are being clear, but you shouldn't
+  function useMyGlobal() {
+    console.log(global.myImportantGlobal);
+  }
+  useMyGlobal();
+
+  // instead do this.
+  function safelyUseMyGlobal(message) {
+    console.log(message);
+  }
+  safelyUseMyGlobal(global.myImportantGlobal);
+})(window);
+</script>
+
+<script id="example-6" class="js-example" type="text/js-tpl">
+/**
+ * What is this undefined parameter for?
+ *
+ * It's to protect you from other peoples bad code.
+ */
+
+// along time ago in a galaxy far away
+undefined = true;
+
+// in chrome this is still undefined, but in IE this is true!
+console.log(undefined);
+/**
+ * and now, you do your thing an write all kinds of nice clean code
+ */
+(function () {
+  var myLocalVar;
+
+  // some code goes here, maybe it sets myLocalVar, maybe not
+
+  // now we do something basd on if myLocalVar is still undefined
+  if (myLocalVar === undefined) {
+    // in chrome we make it here
+    console.log('Yay, we are safe!');
+  } else {
+    // but in IE we end up here because undefined is no longer really undefined
+    console.log('KABOOM, we haven\'t actually defined myLocalVar');
+  }
+})();
+
+(function (undefined) {
+  // because we created a parameter called undefined AND didn't pass
+  // in a value for this parameter our browser kindly follows the rules
+  // of the road and sets our local undefined to properly be undefined.
+
+  var myLocalVar;
+
+  // some code goes here, maybe it sets myLocalVar, maybe not
+
+  // now we do something basd on if myLocalVar is still undefined
+  if (myLocalVar === undefined) {
+    console.log('Yay, we are safe!');
+  } else {
+    console.log('KABOOM, we haven\'t actually defined myLocalVar');
+  }
+})();
+
+</script
 
 
 </body>

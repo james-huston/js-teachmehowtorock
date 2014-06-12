@@ -63,10 +63,12 @@
 
         JSHINT(orig, {
           globals: 'Error',
-          browser: true
+          browser: true,
+          indent: 2,
+          devel: true
         });
         hresult = noBuiltins(JSHINT.data());
-        //console.log(hresult);
+        console.log('Validation Results: ', hresult);
         tag.text = js;
 
         try {
@@ -100,7 +102,7 @@
       }
 
       function noBuiltins(hresult) {
-        var builtins = ["undefined", "this", "Infinity", "NaN", "undefined", "eval", "uneval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape", "Object", "Function", "Boolean", "Symbol", "Error", "EvalError", "InternalError", "RangeError", "ReferenceError", "StopIteration", "SyntaxError", "TypeError", "URIError", "Number", "Math", "Date", "String", "RegExp", "Array", "Float32Array", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Uint8Array", "Uint8ClampedArray", "ParallelArray", "Map", "Set", "WeakMap", "WeakSet", "ArrayBuffer", "DataView", "JSON", "Iterator", "Generator", "Promise", "Reflect", "Proxy", "Intl", "Intl.Collator", "Intl.DateTimeFormat", "Intl.NumberFormat", "arguments", "window"];
+        var builtins = ["undefined", "this", "Infinity", "NaN", "undefined", "eval", "uneval", "isFinite", "isNaN", "parseFloat", "parseInt", "decodeURI", "decodeURIComponent", "encodeURI", "encodeURIComponent", "escape", "unescape", "Object", "Function", "Boolean", "Symbol", "Error", "EvalError", "InternalError", "RangeError", "ReferenceError", "StopIteration", "SyntaxError", "TypeError", "URIError", "Number", "Math", "Date", "String", "RegExp", "Array", "Float32Array", "Float64Array", "Int16Array", "Int32Array", "Int8Array", "Uint16Array", "Uint32Array", "Uint8Array", "Uint8ClampedArray", "ParallelArray", "Map", "Set", "WeakMap", "WeakSet", "ArrayBuffer", "DataView", "JSON", "Iterator", "Generator", "Promise", "Reflect", "Proxy", "Intl", "Intl.Collator", "Intl.DateTimeFormat", "Intl.NumberFormat", "arguments", "window", "console"];
 
         hresult.globals = ( hresult.globals || [] )
           .filter(function (item) {
