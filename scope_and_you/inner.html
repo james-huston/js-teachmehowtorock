@@ -20,12 +20,14 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jshint/2.5.1/jshint.min.js"></script>
   <script>
     (function (w, doc) {
+      var log = console.log;
       var max = 0;
       var ed = ace.edit(document.getElementById('ed'));
       var routes = {
         run: run,
         set: set
       };
+
       ed.setTheme('ace/theme/xcode');
       ed.getSession().setMode('ace/mode/javascript');
       ed.getSession().setOption("useWorker", false);
@@ -59,7 +61,18 @@
         var wtest;
         var re = /(window\..+|window\[.+\]).*\s*=/g;
         orig = ed.getSession().getValue();
-        js = 'try { \n' + ( orig || '' ) + '\n} catch (e) { \nreport(e, ' + JSON.stringify(evt.data) + ');\n }';
+        js = '(function (console) {\ntry { \n' + ( orig || '' ) + '\n} catch (e) { \nreport(e, ' + JSON.stringify(evt.data) + ');\n }\n}(fakeConsole))';
+
+        window.fakeConsole = {};
+
+        window.fakeConsole.log = function () {
+          var msg = [].slice.apply(arguments).join(' ');
+          window.top.postMessage({
+            evt: 'console',
+            msg: msg,
+            id: evt.data.id
+          }, '*');
+        };
 
         JSHINT(orig, {
           globals: 'Error',

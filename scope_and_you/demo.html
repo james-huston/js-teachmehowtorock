@@ -13,8 +13,8 @@
   <div class="container" id="buttons">
     <div class="row">
       <div class="col-md-12">
-          <button class="btn btn-success" id="run">Run them all!!</button>
-          <button class="btn btn-primary" id="new-editor">Add an editor</button>
+          <button class="btn btn-success run">Run the code!</button>
+          <button style="display:none;" class="btn btn-primary" id="new-editor">Add an editor</button>
       </div>
     </div>
 
@@ -22,7 +22,6 @@
       <div class="col-md-12" id="examples">
         <h3>Examples:</h3>
         <div class="btn-group">
-
         </div>
       </div>
     </div>
@@ -30,6 +29,14 @@
   </div>
   <div id="frames">
 
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+          <button class="btn btn-success run">Run the code!</button>
+          <button style="display:none;" class="btn btn-primary" id="new-editor">Add an editor</button>
+      </div>
+    </div>
   </div>
 
   <script id="frametpl" type="text/html-tpl">
@@ -39,11 +46,11 @@
           <div class="alert alert-success">
            All good for now.
           </div>
+          <div style="display:none;" class="alert alert-warning">
+            <h4>Console output</h4>
+          </div>
           <div style="display:none;" class="alert alert-danger">
             <h4>Errors:</h4>
-          </div>
-          <div style="display:none;" class="alert alert-warning">
-
           </div>
         </div>
       </div>
@@ -59,7 +66,10 @@
       var tpl;
       var routes = {
         scanned: onScanned,
-        error: onError
+        error: onError,
+        console: function (evt) {
+          fakeConsole(evt.data.id, 'console', evt.data.msg);
+        }
       };
 
       doc.addEventListener('DOMContentLoaded', function (e) {
@@ -85,21 +95,30 @@
           }(examples[i], i));
         }
 
-        doc.getElementById('run')
-          .addEventListener('click', function (e) {
-            var i, n;
-            var els = document.getElementsByTagName('iframe');
-            e.preventDefault();
+        document.body
+          .addEventListener('click', run);
 
-            for (i = 0, n = els.length; i < n; i += 1) {
-              clearErrs(els[i].dataset.id);
-              els[i].contentWindow
-                .postMessage(
-                  {'evt': 'run', 'id': els[i].dataset.id},
-                  '*'
-                );
-            }
-          });
+        function run(e) {
+          if (!e.target.classList.contains('run')) {
+            return true;
+          }
+
+          var i, n;
+          var els = document.getElementsByTagName('iframe');
+
+          e.preventDefault();
+
+          for (i = 0, n = els.length; i < n; i += 1) {
+            clearErrs(els[i].dataset.id);
+            clearConsole(els[i].dataset.id);
+
+            els[i].contentWindow
+              .postMessage(
+                {'evt': 'run', 'id': els[i].dataset.id},
+                '*'
+              );
+          }
+        }
 
         doc.getElementById('new-editor')
           .addEventListener('click', function (e) {
@@ -223,6 +242,40 @@
           el.removeChild(el.children[i]);
         }
 
+      }
+
+      function fakeConsole(id, type, msg) {
+        var root = document.getElementById(id);
+        var m;
+        var el = root.querySelector('.alerts .alert-warning');
+
+        m = root.querySelector('.console');
+        if (!m) {
+          m = document.createElement('div');
+          m.innerHTML = '<pre></pre>';
+          m.classList.add('console');
+          m.firstChild.textContent = '';
+        }
+
+        m.firstChild.textContent += (m.firstChild.textContent ? '\n' : '') + msg;
+        el.appendChild(m);
+
+        el.style.display = 'block';
+
+        root
+          .querySelector('.alerts .alert-success')
+          .style
+          .display = 'none';
+      }
+
+      function clearConsole(id) {
+        var el = document.getElementById(id)
+          .querySelector('.alerts .alert-warning');
+        var i;
+
+        for (i = 1; i < el.children.length; i += 1) {
+          el.removeChild(el.children[i]);
+        }
       }
 
       function nop() {
@@ -432,7 +485,7 @@ console.log(undefined);
     }
   };
 
-  var setName = myObj.bind(myObj);
+  var setName = myObj.setName.bind(myObj);
 
   //what will myObj.name be after this line?
   setName('Will');
