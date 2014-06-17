@@ -384,13 +384,72 @@ console.log(undefined);
   // now we do something basd on if myLocalVar is still undefined
   if (myLocalVar === undefined) {
     console.log('Yay, we are safe!');
+    console.log('And we can also use void 0, because undefined === void 0!');
   } else {
     console.log('KABOOM, we haven\'t actually defined myLocalVar');
   }
 })();
 
-</script
+</script>
+<script id="example-7" class="js-example" type="text/js-tpl">
+(function (doc) {
+  //`this` in JavaScript is dynamic
+  var myObj = {
+    name: null,
+    setName: function (name) {
+      this.name = name;
+      return this;
+    }
+  };
 
+  //calling function as a property:
+  //`this` is the object before the dot
+  myObj.setName('Bob');
+  console.log(myObj.name);
+
+  //calling function independently:
+  //`this` is...
+  var setName = myObj.setName;
+  setName('Joe');
+
+  //what does this spit out?
+  console.log(myObj.name);
+
+}).call(this, document);
+</script>
+<script id="example-8" class="js-example" type="text/js-tpl">
+/**
+ * You can use `Function.prototype.bind` in IE9 and above
+ * to make sure a function always has the same `this`
+ */
+(function (doc) {
+  var myObj = {
+    name: 'Change me! Change me!',
+    setName: function (name) {
+      this.name = name;
+      return this;
+    }
+  };
+
+  var setName = myObj.bind(myObj);
+
+  //what will myObj.name be after this line?
+  setName('Will');
+  console.log(myObj.name);
+
+  //under the hood, it does a more complicated
+  //version of the following...
+  if (!Function.prototype.bind) {
+    Function.prototype.bind = function (newThis) {
+      var args = [].slice.call(arguments, 1);
+      var fn = this;
+      return function () {
+        return fn.apply( newThis, [].concat( args, [].slice.call(arguments) ) );
+      };
+    };
+  }
+})(document);
+</script>
 
 </body>
 </html>
