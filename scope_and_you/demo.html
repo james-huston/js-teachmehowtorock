@@ -21,6 +21,9 @@
     <div class="row">
       <div class="col-md-12" id="examples">
         <h3>Examples:</h3>
+        <div class="btn-group">
+
+        </div>
       </div>
     </div>
 
@@ -76,7 +79,9 @@
             var btn = document.createElement('button');
             btn.classList.add('btn', 'btn-small', 'btn-info');
             btn.textContent = ( num + 1 );
-            document.getElementById('examples').appendChild(btn);
+            document.getElementById('examples')
+              .querySelector('.btn-group')
+              .appendChild(btn);
           }(examples[i], i));
         }
 
