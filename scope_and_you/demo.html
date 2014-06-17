@@ -392,8 +392,9 @@ console.log(undefined);
 
 </script>
 <script id="example-7" class="js-example" type="text/js-tpl">
-(function (doc) {
-  //`this` in JavaScript is dynamic
+(function () {
+  //`this` is a special variable 
+  //that refers to the current object
   var myObj = {
     name: null,
     setName: function (name) {
@@ -415,14 +416,14 @@ console.log(undefined);
   //what does this spit out?
   console.log(myObj.name);
 
-}).call(this, document);
+})();
 </script>
 <script id="example-8" class="js-example" type="text/js-tpl">
 /**
  * You can use `Function.prototype.bind` in IE9 and above
  * to make sure a function always has the same `this`
  */
-(function (doc) {
+(function () {
   var myObj = {
     name: 'Change me! Change me!',
     setName: function (name) {
@@ -437,8 +438,42 @@ console.log(undefined);
   setName('Will');
   console.log(myObj.name);
 
-  //under the hood, it does a more complicated
-  //version of the following...
+})();
+</script>
+<script id="example-9" class="js-example" type="text/js-tpl">
+/**
+ * You can dynamically change `this`
+ * by using `Function.prototype.call`
+ * and `Function.prototype.apply`
+ */
+(function () {
+  var nameObj = {
+    name: 'Joe',
+    setName: function (name) {
+      this.name = name;
+      return this;
+    }
+  };
+
+  //otherObj does not have a setName method
+  //You *could* just set the name directly,
+  //but you can reuse the setName function as well
+  var otherObj = {
+    name: null
+  };
+
+  //use `Function.prototype.call` to change the `this` variable
+  //when calling `setName`
+  nameObj.setName.call(otherObj, 'Howard');
+
+  //what will these two lines print?
+  console.log(nameObj.name);
+  console.log(otherObj.name);
+
+
+  //`Function.prototype.apply` is just like `.call()`
+  //but `.apply()` lets you pass an array of parameters
+  //This is like what `.bind()` does...
   if (!Function.prototype.bind) {
     Function.prototype.bind = function (newThis) {
       var args = [].slice.call(arguments, 1);
@@ -448,7 +483,9 @@ console.log(undefined);
       };
     };
   }
-})(document);
+  
+}());
+
 </script>
 
 </body>
