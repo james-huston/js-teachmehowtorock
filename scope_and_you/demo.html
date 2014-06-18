@@ -324,34 +324,52 @@ whatsThis('I wouldn\'t do that, Dave');
 </script>
 
 <script id="example-3" class="js-example" type="text/js-tpl">
-// hoisting example
-
-(function () {
-  // create a variable in our isolated scope
-  var waay = 1;
-
-  // create a function that uses the same variable without
-  // redeclaring it.
-  function yesWaay() {
-    if (!waay) {
-      waay = 10;
+/**
+ * Hoisting example w/jQuery
+ * 
+ * The goal this code was trying to accomplish is...
+ * Redirect to a URL from a data attribute on button click
+ * if the button has one, but use a default URL of google.com if not.
+ */
+(function ($) {
+  // jQuery(function(){}) is shorthand for jQuery(document).ready(...)
+  $(function () {
+    var url = 'http://google.com';
+    
+    $(document.createElement('button'))
+      .addClass('go-to-site')
+      .appendTo('body');
+    
+    $('.go-to-site').on('click', function () {
+      var el = $(this);
+      
+      if (el.data('url')) {
+        var url = el.data('url');
+        
+        function logUrl() {
+          console.log('Running with the button\'s URL:', el.data('url'));
+        }
+      }
+      
+      logUrl();
+      
+      //after five seconds, go to the url on the button
+      //or to the default if not found?
+      setTimeout(function () {
+        window.location = url;
+      }, 5000);
+      
+      //what happens when this runs?
+    });
+    
+    function logUrl() {
+      console.log('Running with default URL:', url);
     }
-
-    console.log(waay);
-  }
-
-  yesWaay();
-
-  function noWaay() {
-    if (!waay) {
-      var waay = 10;
-    }
-
-    console.log(waay);
-  }
-
-  noWaay();
-})();
+    
+    $('.go-to-site').trigger('click');
+  });
+}(jQuery));
+}(jQuery));
 
 </script>
 
@@ -541,6 +559,7 @@ console.log(undefined);
 }());
 
 </script>
+<script 
 
 </body>
 </html>
