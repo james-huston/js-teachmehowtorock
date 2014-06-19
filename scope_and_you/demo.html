@@ -128,12 +128,28 @@
 
         doc.getElementById('examples')
           .addEventListener('click', function (e) {
+            if (!e.target.classList.contains('btn')) {
+              return true;
+            }
+
+            var parent = e.currentTarget;
+            console.log(parent);
             var scripts = document.querySelectorAll('.js-example');
             var script = scripts[ (+e.target.textContent) - 1];
+            var n;
+            var btns;
 
             if (!script) {
               throw new Error('Example not found!');
             }
+
+            btns = parent.querySelectorAll('.btn');
+            n = btns.length;
+            while (n--) {
+              btns[n].classList.remove('active');
+            }
+
+            e.target.classList.add('active');
 
             w.frames[0].postMessage({evt: 'set', script: script.text}, '*');
           });
