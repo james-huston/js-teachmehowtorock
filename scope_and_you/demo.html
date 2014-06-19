@@ -128,7 +128,13 @@
 
         doc.getElementById('examples')
           .addEventListener('click', function (e) {
-            var script = document.getElementById('example-' + e.target.textContent);
+            var scripts = document.querySelectorAll('.js-example');
+            var script = scripts[ (+e.target.textContent) - 1];
+
+            if (!script) {
+              throw new Error('Example not found!');
+            }
+
             w.frames[0].postMessage({evt: 'set', script: script.text}, '*');
           });
 
@@ -321,6 +327,38 @@ console.log(myGlobal);
 
 whatsThis('I wouldn\'t do that, Dave');
 
+</script>
+
+<script class="js-example" type="text/js-tpl">
+/**
+ * Simple hoisting example
+ */
+
+(function () {
+  // create a variable in our isolated scope
+  var waay = 1;
+
+  // create a function that uses the same variable without
+  // redeclaring it.
+  function yesWaay() {
+    if (!waay) {
+      waay = 10;
+    }
+
+    console.log(waay);
+  }
+
+  yesWaay();
+
+  function noWaay() {
+    if (!waay) {
+      var waay = 10;
+    }
+
+    console.log(waay);
+  }
+
+  noWaay();
 </script>
 
 <script id="example-3" class="js-example" type="text/js-tpl">
